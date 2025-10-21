@@ -5,12 +5,16 @@ import { serve } from '@hono/node-server';
 import * as db from './handlers/database.js';
 import * as util from './handlers/util.js';
 
+import register from './routes/register.js';
 import login from './routes/login.js';
+import logout from './routes/logout.js';
 
 const app = new Hono();
 const pool = db.getPool();
 
+app.post('/register', (c) => register(c, db, util));
 app.post('/login', (c) => login(c, db, util));
+app.delete('/logout', (c) => logout(c, db, util));
 
 const server = serve({
   fetch: app.fetch,

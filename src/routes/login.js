@@ -29,16 +29,21 @@ export default async(c, db, util) => {
       return await util.error(c, 400, 'Maaf, email atau password kamu salah.');
     }
 
+    // if password is incorrect
+    if (!(await util.password.verify(account.password, password))) {
+      return await util.error(c, 400, 'Maaf, email atau password kamu salah.');
+    }
+
     if (!util.validate.allowOnPlatform(account.role, platform)) {
-      c.status(400);
       return await util.error(c, 400, 'Maaf, tidak bisa masuk akun kamu di sini.');
     }
 
-    console.log(account);
+    const sessionId = util.generate.sessionId();
+    await db.session.insert(conn, sessionId, account.account_id);
 
-    return c.text('hi');
+    return c.json({ success: true, sessionId });
   } catch(err) {
-    console.error(err);
+    console.error(err.message);
     return await util.error(c, 500, 'Maaf, terdapat kesalahan saat mencoba masuk akun.');
   } finally {
     if (conn) conn.release();
