@@ -13,7 +13,6 @@ export default async(c, db, util) => {
     const { sessionId } = body;
     conn = await db.getConn();
 
-    console.log(sessionId.length)
     if (!util.validate.sessionId(sessionId)) {
       return await util.error(c, 400, 'Maaf, terdapat kesalahan saat mencoba keluar akun.');
     }
