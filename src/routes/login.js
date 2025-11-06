@@ -1,4 +1,4 @@
-const requiredData = ['email', 'password', 'platform'];
+const requiredData = ['email', 'password'];
 
 export default async(c, db, util) => {
   let conn;
@@ -29,7 +29,7 @@ export default async(c, db, util) => {
       return await util.error(c, 400, 'Maaf, email atau password kamu salah.');
     }
 
-    if (!util.validate.allowOnMobile(account.role, platform)) {
+    if (!util.validate.allowOnMobile(account.role)) {
       return await util.error(c, 400, 'Maaf, tidak bisa masuk akun kamu di sini.');
     }
 
