@@ -10,16 +10,11 @@ export default async(c, db, util) => {
       return await util.error(c, 400, 'Maaf, terdapat kesalahan saat mencoba masuk akun.');
     }
 
-    let { email, password, platform } = body;
+    let { email, password } = body;
     email = email.toLowerCase();
-    platform = platform.toLowerCase();
 
     if (!util.validate.email(email) || !util.validate.password(password)) {
       return await util.error(c, 400, 'Maaf, email atau password kamu salah.');
-    }
-
-    if (!util.validate.platform(platform)) {
-      return await util.error(c, 400, 'Maaf, terdapat kesalahan saat mencoba masuk akun.');
     }
 
     conn = await db.getConn();
@@ -34,7 +29,7 @@ export default async(c, db, util) => {
       return await util.error(c, 400, 'Maaf, email atau password kamu salah.');
     }
 
-    if (!util.validate.allowOnPlatform(account.role, platform)) {
+    if (!util.validate.allowOnMobile(account.role, platform)) {
       return await util.error(c, 400, 'Maaf, tidak bisa masuk akun kamu di sini.');
     }
 

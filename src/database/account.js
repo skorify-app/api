@@ -1,6 +1,10 @@
 export const get = {
   byEmail: async(conn, email) => {
     return (await conn.query('SELECT * FROM accounts WHERE email = ?', [email]))[0];
+  },
+
+  byId: async(conn, accountId) => {
+    return (await conn.query('SELECT * FROM accounts WHERE account_id = ?', [accountId]))[0];
   }
 }
 

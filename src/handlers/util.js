@@ -3,7 +3,6 @@ import * as crypto from 'crypto';
 import { ulid } from "ulid";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const platforms = ['android', 'web'];
 
 export const validate = {
   body: (requiredData, sentData) => {
@@ -34,16 +33,14 @@ export const validate = {
     return input.length > 7 && input.length < 97;
   },
 
-  platform: (input) => {
-    return platforms.includes(input);
+  // Prevent staff to log in from android app
+  allowOnMobile: (userRole) => {
+    if (userRole === 'STAFF') return false;
+    return true;
   },
 
-  // If the user allows to log in on certain platform, like
-  // staff on web and participant on android.
-  allowOnPlatform: (userRole, platform) => {
-    if (userRole === 'PARTICIPANT' && platform !== 'android') return false;
-    if (userRole === 'STAFF' && platform !== 'web') return false;
-    return true;
+  accountId: () => {
+    return id.length === 26;
   },
 
   sessionId: (id) => {
