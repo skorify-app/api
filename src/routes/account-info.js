@@ -18,12 +18,12 @@ export default async(c, db, util) => {
 
     conn = await db.getConn();
 
-    const accountId = await db.session.get(conn, sessionId);
-    if (!accountId) {
+    const session = await db.session.get(conn, sessionId);
+    if (!session) {
       return await util.error(c, 400, 'Maaf, ID sesi tidak tercatat.');
     }
 
-    const account = await db.account.get.byId(conn, accountId);
+    const account = await db.account.get.byId(conn, session.account_id);
     if (!account) {
       return await util.error(c, 400, 'Maaf, akun tidak ditemukan atau sudah terhapus.');
     }
