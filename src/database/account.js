@@ -1,22 +1,16 @@
 export const get = {
-  byEmail: async(conn, email) => {
-    return (await conn.query('SELECT * FROM accounts WHERE email = ?', [email]))[0];
-  },
+	byEmail: async(conn, email) => {
+		return (await conn.query('SELECT * FROM accounts WHERE email = ?;', [email]))[0];
+	},
 
-  byId: async(conn, accountId) => {
-    return (await conn.query('SELECT * FROM accounts WHERE account_id = ?', [accountId]))[0];
-  }
+	byId: async(conn, accountId) => {
+		return (await conn.query('SELECT * FROM accounts WHERE account_id = ?;', [accountId]))[0];
+	}
 }
 
 export const create = async(conn, accountId, fullName, email, password) => {
-  await conn.query(
-    `INSERT INTO accounts(account_id, full_name, email, password, role) VALUES(?, ?, ?, ?, ?);`,
-    [
-      accountId,
-      fullName,
-      email,
-      password,
-      'PARTICIPANT'
-    ]
-  );
+	await conn.query(
+		`INSERT INTO accounts(account_id, full_name, email, password, role) VALUES(?, ?, ?, ?, ?);`,
+		[ accountId, fullName, email, password, 'PARTICIPANT' ]
+	);
 }
