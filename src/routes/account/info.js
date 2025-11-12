@@ -13,6 +13,8 @@ export default async(c, db, util) => {
 
 		delete validAccount.password;
 
+		validAccount.role = (validAccount.role === 'ADMIIN') ? 'Admin' : 'Peserta';
+
 		return c.json({ account: validAccount });
 	} catch(err) {
 		console.error(err.message);
