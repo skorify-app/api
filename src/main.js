@@ -14,6 +14,7 @@ const app = new Hono()
 .post('/account/login', (c) => route.account.login(c, db, util))
 .delete('/account/logout', (c) => route.account.logout(c, db, util))
 .post('/account/register', (c) => route.account.register(c, db, util))
+.put('/account/update', (c) => route.account.update(c, db, util))
 
 .get('/questions/get/:subtestId', (c) => route.questions.get(c, db, util))
 .post('/questions/submit', (c) => route.questions.submit(c, db, util))

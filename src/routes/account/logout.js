@@ -4,7 +4,7 @@ export default async(c, db, util) => {
 	try {
 		const sessionId = c.req.header('Session');
 		if (!sessionId || !util.validate.sessionId(sessionId)) {
-			return await util.error(c, 400, 'Maaf, ID sesi tidak valid.');
+			return c.text(null, 400);
 		}
 
 		conn = await db.getConn();
@@ -13,7 +13,7 @@ export default async(c, db, util) => {
 		return c.text(null, 204);
 	} catch(err) {
 		console.error(err);
-		return await util.error(c, 500, 'Maaf, terdapat kesalahan saat mencoba keluar akun.');
+		return c.text(null, 500);
 	} finally {
 		if (conn) conn.release();
 	}

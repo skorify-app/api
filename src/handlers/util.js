@@ -30,7 +30,11 @@ export const validate = {
 	},
 
 	password: (input) => {
-		return input.length > 7 && input.length < 97;
+		if (input.length < 8 && input.length > 100) return false;
+		return /[A-Z]/.test(input) &&
+			/[a-z]/.test(input) &&
+			/[0-9]/.test(input) &&
+			/[!@#$%^&*(),.?":{}|<>]/.test(input);
 	},
 
 	// Prevent staff to log in from android app
