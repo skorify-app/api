@@ -44,7 +44,7 @@ export default async(c, db, util) => {
 		let password = newPassword;
 		if (password) {
 			const currentHashedPassword = (await db.account.get.byId(conn, accountId)).password;
-			const isCurrentPasswordCorrect = await util.password.verify(currentHashedPassword, newPassword);
+			const isCurrentPasswordCorrect = await util.password.verify(currentHashedPassword, currentPassword);
 
 			if (!isCurrentPasswordCorrect) {
 				return await util.error(c, 400, 'Maaf, kata sandi Anda yang sekarang salah.');
