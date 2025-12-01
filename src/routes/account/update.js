@@ -13,7 +13,7 @@ export default async(c, db, util) => {
 			return await util.error(c, 400, 'Permintaan gagal karena tidak ada data yang ingin diubah.');
 		}
 
-		let { fullName, email, password } = body;
+		let { fullName, email, currentPassword, newPassword } = body;
 		if (email) email = email.toLowerCase();
 
 		if (fullName && !util.validate.fullName(fullName)) {
@@ -24,7 +24,7 @@ export default async(c, db, util) => {
 			return await util.error(c, 400, 'Maaf, email kamu tidak valid, mohon cek kembali.');
 		}
 
-		if (password && !util.validate.password(password)) {
+		if (currentPassword && !util.validate.password(newPassword)) {
 			return await util.error(
 				c, 400, 
 				'Maaf, kata sandi kamu tidak memenuhi syarat.\nMinimal 8 karakter, mengandung 1 huruf besar, 1 huruf kecil, dan 1 simbol.'
@@ -40,7 +40,18 @@ export default async(c, db, util) => {
 			return await util.error(c, 400, 'Maaf, email ini tidak tersedia.');
 		}
 
-		if (password) password = await util.password.hash(password);
+
+		let password = newPassword;
+		if (password) {
+			const currentHashedPassword = account.password;
+			const isCurrentPasswordCorrect = await util.password.verify(currentHashedPassword, newPassword);
+
+			if (!isCurrentPasswordCorrect) {
+				return await util.error(c, 400, 'Maaf, kata sandi Anda yang sekarang salah.');
+			}
+
+			password = await util.password.hash(password);
+		}
 
 		await db.account.update({ conn, accountId, fullName, email, password });
 
