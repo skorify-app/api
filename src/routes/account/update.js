@@ -43,7 +43,7 @@ export default async(c, db, util) => {
 
 		let password = newPassword;
 		if (password) {
-			const currentHashedPassword = account.password;
+			const currentHashedPassword = (await db.account.get.byId(conn, accountId)).password;
 			const isCurrentPasswordCorrect = await util.password.verify(currentHashedPassword, newPassword);
 
 			if (!isCurrentPasswordCorrect) {
