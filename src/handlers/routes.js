@@ -7,6 +7,10 @@ import update from '../routes/account/update.js';
 import get from '../routes/questions/get.js';
 import submit from '../routes/questions/submit.js';
 
+import index from '../routes/subtests/index.js';
+
+import validate from '../routes/session/validate.js';
+
 const account = {
 	info, login, logout, register, update
 }
@@ -15,6 +19,14 @@ const questions = {
 	get, submit
 }
 
+const subtests = {
+	index
+}
+
+const session = {
+	validate
+}
+
 export {
-	account, questions
+	account, questions, subtests, session
 }

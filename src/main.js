@@ -19,6 +19,10 @@ const app = new Hono()
 .get('/questions/get/:subtestId', (c) => route.questions.get(c, db, util))
 .post('/questions/submit', (c) => route.questions.submit(c, db, util))
 
+.get('/subtests', (c) => route.subtests.index(c, db, util))
+
+.get('/session/validate', (c) => route.session.validate(c, db, util))
+
 const server = serve({
 	fetch: app.fetch,
 	port: process.env.PORT ?? 3000,

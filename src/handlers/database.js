@@ -3,6 +3,7 @@ import * as accountHandler from '../database/account.js';
 import * as sessionHandler from '../database/session.js';
 import * as questionHandler from '../database/question.js';
 import * as choiceHandler from '../database/choice.js';
+import * as subtestHandler from '../database/subtest.js';
 
 let pool;
 
@@ -106,3 +107,4 @@ export const account = accountHandler;
 export const session = sessionHandler;
 export const question = questionHandler;
 export const choice = choiceHandler;
+export const subtest = subtestHandler;
