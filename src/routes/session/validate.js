@@ -10,15 +10,15 @@ export default async(c, db, util) => {
 		conn = await db.getConn();
 		const sessionExists = await db.session.get(conn, sessionId);
 		if (!sessionExists) {
-			return c.json({ exist: false });
+			return c.json(null,  410);
 		}
 
 		const accountExists = await db.account.get.byId(conn, sessionExists.account_id);
 		if (!accountExists) {
-			return c.json({ exist: false });
+			return c.json(null,  410);
 		}
 
-		return c.json({ exist: true });
+		return c.json(null);
 	} catch(err) {
 		console.error(err);
 		return c.json(null, 503);
