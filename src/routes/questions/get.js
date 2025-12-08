@@ -14,7 +14,7 @@ export default async(c, db, util) => {
 		const validAccount = await util.validate.account(db, conn, sessionId);
 		if (validAccount.error) return await util.error(c, 400, validAccount.error);
 
-		const questions = await db.question.get(conn, subtestId, true);
+		const questions = await db.question.get.contents(conn, subtestId, true);
 		if (!questions.length) return await util.error(c, 400, 'Maaf, subtest tidak dtemukan.');
 
 		for (let question of questions) {

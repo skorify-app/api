@@ -9,8 +9,18 @@ export default async(c, db, util) => {
 
 		conn = await db.getConn();
 
-		const subtests = await db.subtest.get(conn);
-		return c.json(subtests);
+		let result = [];
+
+		let subtests = await db.subtest.get(conn);
+		if (subtests.length) {
+			for (let subtest of subtests) {
+				const totalQuestions = await db.question.get.total(conn, subtest.subtest_id);
+				subtest.totalQuestions = parseInt((totalQuestions)['COUNT(*)']);
+				result.push(subtest);
+			}
+		}
+
+		return c.json(result);
 	} catch(err) {
 		console.error(err);
 		return await util.error(c, 500, 'Maaf, terdapat kesalahan pada server.');
