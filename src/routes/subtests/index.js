@@ -15,7 +15,7 @@ export default async(c, db, util) => {
 		if (subtests.length) {
 			for (let subtest of subtests) {
 				const totalQuestions = await db.question.get.total(conn, subtest.subtest_id);
-				subtest.totalQuestions = parseInt((totalQuestions)['COUNT(*)']);
+				subtest['total_questions'] = parseInt((totalQuestions)['COUNT(*)']);
 				result.push(subtest);
 			}
 		}
