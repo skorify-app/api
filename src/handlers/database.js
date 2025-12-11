@@ -4,6 +4,8 @@ import * as sessionHandler from '../database/session.js';
 import * as questionHandler from '../database/question.js';
 import * as choiceHandler from '../database/choice.js';
 import * as subtestHandler from '../database/subtest.js';
+import * as recordedAnswerHandler from '../database/recorded-answer.js';
+import * as scoreHandler from '../database/score.js';
 
 let pool;
 
@@ -108,3 +110,5 @@ export const session = sessionHandler;
 export const question = questionHandler;
 export const choice = choiceHandler;
 export const subtest = subtestHandler;
+export const recordedAnswer = recordedAnswerHandler;
+export const score = scoreHandler;
