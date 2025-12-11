@@ -73,6 +73,9 @@ export default async(c, db, util) => {
 		await db.recordedAnswer.insert(conn, scoreId, answerResults);
 
 		await conn.commit();
+
+		// TODO: returns proper value
+		return c.json(null, 200);
 	} catch(err) {
 		// almost two of these errors are generated because of
 		// broken JSON data from client that has been tampered.
