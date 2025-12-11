@@ -19,7 +19,7 @@ export default async(c, db, util) => {
 
 		for (let question of questions) {
 			const choices = await db.choice.get(conn, question.question_id);
-			question.choices = choices;
+			question.choices = shuffleChoices(choices);
 		}
 
 		return c.json(questions);
@@ -30,3 +30,15 @@ export default async(c, db, util) => {
 		if (conn) conn.release();
 	}
 }
+
+function shuffleChoices(choices) {
+	const result = [...choices];
+
+	for (let i = result.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[result[i], result[j]] = [result[j], result[i]];
+	}
+
+	return result;
+}
+
