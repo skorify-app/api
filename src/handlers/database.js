@@ -1,4 +1,6 @@
 import mariadb from 'mariadb';
+import * as fs from 'fs';
+
 import * as accountHandler from '../database/account.js';
 import * as sessionHandler from '../database/session.js';
 import * as questionHandler from '../database/question.js';
@@ -7,6 +9,7 @@ import * as subtestHandler from '../database/subtest.js';
 import * as recordedAnswerHandler from '../database/recorded-answer.js';
 import * as scoreHandler from '../database/score.js';
 
+const sslPath = import.meta.dirname + '/../../ssl/';
 let pool;
 
 export const init = async function InitDatabase() {
@@ -17,7 +20,13 @@ export const init = async function InitDatabase() {
 		port: process.env.DB_PORT,
 		database: process.env.DB_DATABASE,
 		connectionLimit: process.env.DB_CONN_LIMIT ?? 10,
-		connectTimeout: 5000
+		connectTimeout: 5000,
+		ssl: {
+			cert: fs.readFileSync(sslPath + 'client-cert.pem'),
+			key: fs.readFileSync(sslPath + 'client-key.pem'),
+			ca: fs.readFileSync(sslPath + 'ca-cert.pem'),
+			rejectUnauthorized: false
+		}
 	});
 	console.log('Database pool has been created.');
 
