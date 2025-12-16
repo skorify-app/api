@@ -94,8 +94,7 @@ export const generate = {
 export const convertTimestamp = (timestamp) => {
 	const serverDate = new Date(timestamp);
 
-	const localizedDate = new Date(serverDate - (1000 * 60 * 60));
-	let result = localizedDate
+	let result = serverDate
 	.toLocaleString('id-ID', options)
 	.replace(' pukul', '')
 
