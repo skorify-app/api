@@ -1,15 +1,17 @@
-import info from '../routes/account/info.js';
-import login from '../routes/account/login.js';
-import logout from '../routes/account/logout.js';
+import info     from '../routes/account/info.js';
+import login    from '../routes/account/login.js';
+import logout   from '../routes/account/logout.js';
 import register from '../routes/account/register.js';
-import update from '../routes/account/update.js';
+import update   from '../routes/account/update.js';
 
-import get from '../routes/questions/get.js';
-import submit from '../routes/questions/submit.js';
+import get      from '../routes/questions/get.js';
+import submit   from '../routes/questions/submit.js';
 
-import index from '../routes/subtests/index.js';
+import index    from '../routes/subtests/index.js';
 
 import validate from '../routes/session/validate.js';
+
+import fetch    from '../routes/questions/get.js';
 
 const account = {
 	info, login, logout, register, update
@@ -27,6 +29,10 @@ const session = {
 	validate
 }
 
+const scores = {
+	fetch
+}
+
 export {
-	account, questions, subtests, session
+	account, questions, subtests, session, scores
 }
