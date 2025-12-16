@@ -1,5 +1,12 @@
 export const get = {
-	one: () => {},
+	one: async(conn, scoreId, accountId) => {
+		return (
+			await conn.query(
+				'SELECT score, subtest_id FROM scores WHERE score_id = ? AND account_id = ?;',
+				[scoreId, accountId]
+			)
+		)[0];
+	},
 	all: async(conn, accountId) => {
 		return await conn.query('SELECT * FROM scores WHERE account_id = ?;', [accountId]);
 	}

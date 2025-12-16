@@ -12,7 +12,7 @@ import index    from '../routes/subtests/index.js';
 import validate from '../routes/session/validate.js';
 
 import fetch    from '../routes/scores/fetch.js';
-import scoreInfo from '../routes/scores/info.js';
+import detail   from '../routes/scores/detail.js';
 
 
 const account = {
@@ -32,7 +32,7 @@ const session = {
 }
 
 const scores = {
-	fetch, scoreInfo
+	fetch, detail
 }
 
 export {
