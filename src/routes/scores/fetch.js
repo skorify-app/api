@@ -56,9 +56,9 @@ export default async(c, db, util) => {
 				}
 			}
 
-			score['answers'] = {
-				correct, incorrect, empty
-			};
+			score['correct_answers'] = correct;
+			score['incorrect_answers'] = incorrect;
+			score['empty_answers'] = empty;
 
 			delete score.subtest_id;
 
