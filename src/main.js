@@ -23,7 +23,7 @@ const app = new Hono()
 
 .get('/session/validate', (c) => route.session.validate(c, db, util))
 
-.get('/scores', (c) => route.scores.index(c, db, util))
+.get('/scores', (c) => route.scores.fetch(c, db, util))
 
 const server = serve({
 	fetch: app.fetch,
