@@ -21,6 +21,10 @@ export default async(c, db, util) => {
 		if (!recordedUserAnswers.length) return c.json(null, 404);
 
 		const subtestId = score.subtest_id;
+
+		const subtest = (await db.subtest.get(conn)).find(x => x.subtest_id === subtestId);
+		score['subtest_name'] = subtest.subtest_name;
+
 		const recordedQuestions = await db.question.get.contents(conn, subtestId, false);
 
 		let questions = [];
