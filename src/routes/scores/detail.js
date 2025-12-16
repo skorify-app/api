@@ -27,6 +27,12 @@ export default async(c, db, util) => {
 
 		const recordedQuestions = await db.question.get.contents(conn, subtestId, false);
 
+		let answers = {
+			correct: 0,
+			incorrect: 0,
+			empty: 0
+		};
+
 		let questions = [];
 
 		for (let userAnswer of recordedUserAnswers) {
@@ -37,16 +43,27 @@ export default async(c, db, util) => {
 			if (!questionData) continue;
 
 			const questionId = questionData.question_id;
+			const correctAnswer = questionData.answer;
+			const userAnswerLabel = userAnswer.answer;
 			const choices = await db.choice.get(conn, questionId);
+
+			if (!userAnswer) {
+				answers.empty++;
+			} else if (userAnswerLabel === correctAnswer) {
+				answers.correct++;
+			} else if (userAnswerLabel !== correctAnswer) {
+				answers.incorrect++;
+			}
 
 			questions.push({
 				text: questionData.question_text,
-				correctAnswer: questionData.answer,
-				userAnswer: userAnswer.answer,
+				correctAnswer,
+				userAnswer: userAnswerLabel,
 				choices
 			});
 		}
 
+		score['answers'] = answers;
 		score['questions'] = questions;
 
 		return c.json(score);
