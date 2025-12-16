@@ -1,8 +1,18 @@
 import { hash, verify } from 'argon2';
 import * as crypto from 'crypto';
-import { ulid } from "ulid";
+import { ulid } from 'ulid';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const options = {
+	year: 'numeric',
+	month: 'long',
+	day: 'numeric',
+	hour: '2-digit',
+	minute: '2-digit',
+	second: '2-digit',
+	timeZone: 'Asia/Jakarta',
+	timeZoneName: 'short'
+};
 
 export const validate = {
 	body: (requiredData, sentData) => {
@@ -79,4 +89,15 @@ export const generate = {
 	sessionId: () => {
 		return crypto.randomBytes(64).toString('hex');
 	}
+}
+
+export const convertTimestamp = (timestamp) => {
+	const serverDate = new Date(timestamp);
+
+	const localizedDate = new Date(serverDate - (1000 * 60 * 60));
+	let result = localizedDate
+	.toLocaleString('id-ID', options)
+	.replace(' pukul', '')
+
+	return result;
 }
