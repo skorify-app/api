@@ -40,7 +40,6 @@ export const validate = {
 	},
 
 	password: (input) => {
-		if (input.length < 8 && input.length > 100) return false;
 		return /[A-Z]/.test(input) &&
 			/[a-z]/.test(input) &&
 			/[0-9]/.test(input) &&

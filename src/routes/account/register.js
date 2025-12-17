@@ -21,8 +21,12 @@ export default async(c, db, util) => {
 			return await util.error(c, 400, 'Maaf, alamat email kamu tidak valid. Mohon cek kembali.');
 		}
 
-		if (!util.validate.password(password)) {
+		if (password.length < 8 && password.length > 100) {
 			return await util.error(c, 400, 'Maaf, kata sandi kamu terlalu pendek atau panjang. Mohon cek kembali.');
+		}
+
+		if (!util.validate.password(password)) {
+			return await util.error(c, 400, 'Maaf, kata sandi harus memiliki setidaknya 1 simbol, 1 angka, serta 1 huruf kapital dan kecil.');
 		}
 
 		conn = await db.getConn();
