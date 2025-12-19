@@ -17,12 +17,14 @@ export default async(c, db, util) => {
 		const questions = await db.question.get.contents(conn, subtestId, true);
 		if (!questions.length) return await util.error(c, 400, 'Maaf, subtest tidak dtemukan.');
 
-		for (let question of questions) {
+		const shuffledQuestions = shuffleChoices(questions);
+
+		for (let question of shuffledQuestions) {
 			const choices = await db.choice.get(conn, question.question_id);
 			question.choices = shuffleChoices(choices);
 		}
 
-		return c.json(questions);
+		return c.json(shuffledQuestions);
 	} catch(err) {
 		console.error(err);
 		return await util.error(c, 500, 'Maaf, terdapat kesalahan pada server.');
