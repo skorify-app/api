@@ -31,7 +31,7 @@ export default async(c, db, util) => {
 			correct: 0,
 			incorrect: 0,
 			empty: 0
-		};
+		}
 
 		let questions = [];
 
@@ -47,7 +47,7 @@ export default async(c, db, util) => {
 			const userAnswerLabel = userAnswer.answer;
 			const choices = await db.choice.get(conn, questionId);
 
-			if (!userAnswer) {
+			if (!userAnswerLabel) {
 				answers.empty++;
 			} else if (userAnswerLabel === correctAnswer) {
 				answers.correct++;
