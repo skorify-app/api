@@ -29,11 +29,8 @@ export default async(c, db, util) => {
 		const questions = await db.question.get.contents(conn, subtestId, false);
 		const questionLen = questions.length;
 
+		// If the questions are not found
 		if (!questionLen) return await util.error(c, 400, 'Maaf, subtest tidak dtemukan.');
-
-		if (questionLen !== answers.length) {
-			return await util.error(c, 400, 'Maaf, data jawaban kamu tidak valid.');
-		}
 
 		const scorePerQuestion = MAX_SCORE / questionLen;
 		let totalScore = 0;
@@ -42,16 +39,22 @@ export default async(c, db, util) => {
 
 		for (let question of questions) {
 			let questionId = question.question_id;
-			let userAnswer = answers.filter(answer => answer.id === String(questionId));
 
-			// If the answer is duplicated
-			if (userAnswer.length > 1) {
-				if (!userAnswer) return await util.error(c, 400, 'Maaf, data jawaban kamu tidak valid.');
+			let getAnswer = answers.filter(answer => answer.id === String(questionId));
+			const len = getAnswer.length;
+
+			// If the answer is empty
+			if (!len) {
+				answerResults.push({ questionId, userAnswer: null  });
+				continue;
 			}
 
-			userAnswer = userAnswer[0];
+			// If the answer is duplicated
+			if (len > 1) {
+				return await util.error(c, 400, 'Maaf, data jawaban kamu tidak valid.');
+			}
 
-			if (!userAnswer) return await util.error(c, 400, 'Maaf, data jawaban kamu tidak valid.');
+			const userAnswer = getAnswer[0];
 
 			let correctAnswer = question.answer;
 			let userAnswerLabel = userAnswer.answerLabel;
