@@ -32,7 +32,7 @@ export const init = async function InitDatabase() {
 
 
 	// not required: to detect unreleased connections
-	pool.on('acquire', (connection) => {
+	/*pool.on('acquire', (connection) => {
 		console.log(`Connection ${connection.threadId} acquired from pool`);
 	});
 
@@ -45,20 +45,13 @@ export const init = async function InitDatabase() {
 	});
 
 	setInterval(() => {
-		// Get current number of active connections
-		const active = pool.activeConnections(); 
-
-		// Get total number of connections (used and unused)
-		const total = pool.totalConnections();  
-
-		// Get current number of unused connections
-		const idle = pool.idleConnections();    
-
-		// Get size of pending connection requests queue
-		const queued = pool.taskQueueSize();   
+		const active = pool.activeConnections();
+		const total = pool.totalConnections();
+		const idle = pool.idleConnections();
+		const queued = pool.taskQueueSize();
 
 		console.log(`Pool status: ${active}/${total} connections active, ${idle} idle, ${queued} requests queued`);
-	}, 1000);
+	}, 1000);*/
 }
 
 export const getPool = function GetDatabasePool() {

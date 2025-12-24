@@ -13,16 +13,17 @@ const pool = db.getPool();
 
 const app = new Hono()
 
-.get('/account/info', auth, (c) => route.account.info(c))
 .post('/account/login', (c) => route.account.login(c, db, util))
-.delete('/account/logout',auth, (c) => route.account.logout(c, db, util))
 .post('/account/register', (c) => route.account.register(c, db, util))
-.put('/account/update', (c) => route.account.update(c, db, util))
 
-.get('/questions/get/:subtestId', (c) => route.questions.get(c, db, util))
-.post('/questions/submit', (c) => route.questions.submit(c, db, util))
+.get('/account/info', auth, (c) => route.account.info(c))
+.delete('/account/logout',auth, (c) => route.account.logout(c, db))
+.put('/account/update', auth, (c) => route.account.update(c, db, util))
 
-.get('/subtests', (c) => route.subtests.index(c, db, util))
+.get('/subtests', auth, (c) => route.subtests.index(c, db, util))
+
+.get('/questions/get/:subtestId', auth, (c) => route.questions.get(c, db, util))
+.post('/questions/submit', auth, (c) => route.questions.submit(c, db, util))
 
 .get('/session/validate', (c) => route.session.validate(c, db, util))
 

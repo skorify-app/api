@@ -2,17 +2,10 @@ export default async(c, db, util) => {
 	let conn;
 
 	try {
-		const sessionId = c.req.header('Session');
-		if (!sessionId || !util.validate.sessionId(sessionId)) {
-			return await util.error(c, 400, 'Maaf, ID sesi tidak valid.');
-		}
-
 		const subtestId = parseInt(c.req.param('subtestId'));
 		if (isNaN(subtestId)) return await util.error(c, 400, 'Maaf, subtest tidak dtemukan.');
 
 		conn = await db.getConn();
-		const validAccount = await util.validate.account(db, conn, sessionId);
-		if (validAccount.error) return await util.error(c, 400, validAccount.error);
 
 		const questions = await db.question.get.contents(conn, subtestId, true);
 		if (!questions.length) return await util.error(c, 400, 'Maaf, subtest tidak dtemukan.');

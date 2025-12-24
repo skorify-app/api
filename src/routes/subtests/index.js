@@ -2,11 +2,6 @@ export default async(c, db, util) => {
 	let conn;
 
 	try {
-		const sessionId = c.req.header('Session');
-		if (!sessionId || !util.validate.sessionId(sessionId)) {
-			return await util.error(c, 400, 'Maaf, ID sesi tidak valid.');
-		}
-
 		conn = await db.getConn();
 
 		let result = [];

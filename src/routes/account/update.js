@@ -2,11 +2,6 @@ export default async(c, db, util) => {
 	let conn;
 
 	try {
-		const sessionId = c.req.header('Session');
-		if (!sessionId || !util.validate.sessionId(sessionId)) {
-			return await util.error(c, 400, 'Maaf, ID sesi tidak valid.');
-		}
-
 		const body = await c.req.json();
 
 		if (Object.keys(body) > 3 || Object.keys(body) < 1) {
@@ -14,12 +9,15 @@ export default async(c, db, util) => {
 		}
 
 		let { fullName, email, currentPassword, newPassword } = body;
-		if (email) email = email.toLowerCase();
+		if (!fullName && !email && !currentPassword && !newPassword) {
+			return await util.error(c, 400, 'Permintaan gagal karena tidak ada data yang ingin diubah.');
+		}
 
 		if (fullName && !util.validate.fullName(fullName)) {
 			return await util.error(c, 400, 'Maaf, nama lengkap kamu terlalu panjang atau terlalu pendek.');
 		}
 
+		if (email) email = email.toLowerCase();
 		if (email && !util.validate.email(email)) {
 			return await util.error(c, 400, 'Maaf, email kamu tidak valid, mohon cek kembali.');
 		}
@@ -33,20 +31,20 @@ export default async(c, db, util) => {
 
 		conn = await db.getConn();
 
-		const accountId = (await db.session.get(conn, sessionId)).account_id;
-		const account = await db.account.get.byEmail(conn, email);
+		const accountId = c.req.account.account_id;
+		const accountWithNewEmail = await db.account.get.byEmail(conn, email);
 
-		if (account && account.account_id !== accountId) {
+		if (accountWithNewEmail && accountWithNewEmail.account_id !== accountId) {
 			return await util.error(c, 400, 'Maaf, email ini tidak tersedia.');
 		}
 
 
 		let password = newPassword;
 		if (password) {
-			const currentHashedPassword = (await db.account.get.byId(conn, accountId)).password;
-			const isCurrentPasswordCorrect = await util.password.verify(currentHashedPassword, currentPassword);
+			const currentHashedPassword = c.req.account.password;
+			const isCurrentPassCorrect = await util.password.verify(currentHashedPassword, currentPassword);
 
-			if (!isCurrentPasswordCorrect) {
+			if (!isCurrentPassCorrect) {
 				return await util.error(c, 400, 'Maaf, kata sandi Anda yang sekarang salah.');
 			}
 
@@ -61,7 +59,7 @@ export default async(c, db, util) => {
 			return await util.error(c, 400, 'Permintaan gagal karena tidak ada data yang ingin diubah.');
 		}
 
-		if (err.message.includes('Unexpected token')) {
+		if (err.message.includes('Unexpected token') || err.message.includes('Expected double-quoted')) {
 			return await util.error(c, 400, 'Permintaan gagal karena data tidak valid.');			
 		}
 

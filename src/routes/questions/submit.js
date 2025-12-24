@@ -5,26 +5,18 @@ export default async(c, db, util) => {
 	let conn;
 
 	try {
-		const sessionId = c.req.header('Session');
-		if (!sessionId || !util.validate.sessionId(sessionId)) {
-			return await util.error(c, 400, 'Maaf, ID sesi tidak valid.');
-		}
-
 		const body = await c.req.json();
 
 		if (!util.validate.body(requiredData, body)) {
 			return await util.error(c, 400, 'Maaf, data jawaban kamu tidak valid.');
 		}
 
-		conn = await db.getConn();
-
-		const validAccount = await util.validate.account(db, conn, sessionId);
-		if (validAccount.error) return await util.error(c, 400, validAccount.error);
-
 		const { answers } = body;
 		const subtestId = parseInt(body.subtestId);
 
 		if (isNaN(subtestId)) return await util.error(c, 400, 'Maaf, data jawaban kamu tidak valid.');
+
+		conn = await db.getConn();
 
 		const questions = await db.question.get.contents(conn, subtestId, false);
 		const questionLen = questions.length;
@@ -54,7 +46,7 @@ export default async(c, db, util) => {
 				return await util.error(c, 400, 'Maaf, data jawaban kamu tidak valid.');
 			}
 
-			const userAnswer = getAnswer[0];
+			const userAnswer = getAnswer[0].toUpperCase();
 
 			let correctAnswer = question.answer;
 			let userAnswerLabel = userAnswer.answerLabel;
@@ -68,7 +60,7 @@ export default async(c, db, util) => {
 		}
 
 		totalScore = Math.min(Math.round(totalScore), MAX_SCORE);
-		const { account_id } = validAccount;
+		const { account_id } = c.req.account;
 
 		const scoreId = await db.score.insert(conn, subtestId, account_id, totalScore);
 
