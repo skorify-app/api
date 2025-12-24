@@ -25,10 +25,10 @@ const app = new Hono()
 .get('/questions/get/:subtestId', auth, (c) => route.questions.get(c, db, util))
 .post('/questions/submit', auth, (c) => route.questions.submit(c, db, util))
 
-.get('/session/validate', (c) => route.session.validate(c, db, util))
+.get('/session/validate', auth, (c) => route.session.validate(c))
 
-.get('/scores', (c) => route.scores.fetch(c, db, util))
-.get('/scores/:scoreId', (c) => route.scores.detail(c, db, util))
+.get('/scores', auth, (c) => route.scores.fetch(c, db, util))
+.get('/scores/:scoreId', auth, (c) => route.scores.detail(c, db, util))
 
 const server = serve({
 	fetch: app.fetch,
