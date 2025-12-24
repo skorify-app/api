@@ -2,6 +2,8 @@ import 'dotenv/config';
 import { Hono } from 'hono'
 import { serve } from '@hono/node-server';
 
+import auth from './handlers/auth.js';
+
 import * as db from './handlers/database.js';
 import * as util from './handlers/util.js';
 import * as route from './handlers/routes.js';
@@ -10,9 +12,10 @@ await db.init();
 const pool = db.getPool();
 
 const app = new Hono()
-.get('/account/info', (c) => route.account.info(c, db, util))
+
+.get('/account/info', auth, (c) => route.account.info(c))
 .post('/account/login', (c) => route.account.login(c, db, util))
-.delete('/account/logout', (c) => route.account.logout(c, db, util))
+.delete('/account/logout',auth, (c) => route.account.logout(c, db, util))
 .post('/account/register', (c) => route.account.register(c, db, util))
 .put('/account/update', (c) => route.account.update(c, db, util))
 
