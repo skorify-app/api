@@ -16,6 +16,10 @@ const auth = createMiddleware(async(c, next) => {
 		const accountExist = await util.validate.account(db, conn, sessionId);
 		if (accountExist.error) return await util.error(c, 400, accountExist.error);
 
+		if (accountExist.role !== 'PARTICIPANT') {
+			return await util.error(c, 400, 'Maaf, hanya peserta yang dapat menggunakan fitur aplikasi mobile Skorify.');
+		}
+
 		c.req.sessionId = sessionId;
 		c.req.account = accountExist;
 
