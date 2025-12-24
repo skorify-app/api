@@ -30,7 +30,7 @@ export default async(c, db, util) => {
 		}
 
 		if (!util.validate.allowOnMobile(account.role)) {
-			return await util.error(c, 400, 'Maaf, tidak bisa masuk akun kamu di sini.');
+			return await util.error(c, 400, 'Maaf, hanya akun peserta yang dapat masuk akun pada aplikasi ini.');
 		}
 
 		const sessionId = util.generate.sessionId();
