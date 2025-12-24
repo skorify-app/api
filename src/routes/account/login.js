@@ -24,7 +24,6 @@ export default async(c, db, util) => {
 			return await util.error(c, 400, 'Maaf, email atau password kamu salah.');
 		}
 
-		// if password is incorrect
 		if (!(await util.password.verify(account.password, password))) {
 			return await util.error(c, 400, 'Maaf, email atau password kamu salah.');
 		}

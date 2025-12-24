@@ -46,9 +46,8 @@ export const validate = {
 			/[!@#$%^&*(),.?":{}|<>]/.test(input);
 	},
 
-	// Prevent staff to log in from android app
 	allowOnMobile: (userRole) => {
-		return userRole !== 'PARTICIPANT';
+		return userRole === 'PARTICIPANT';
 	},
 
 	accountId: () => {

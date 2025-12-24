@@ -30,81 +30,36 @@ export const init = async function InitDatabase() {
 	});
 	console.log('Database pool has been created.');
 
-	// Create tables if those don't exist
-	const conn = await pool.getConnection();
-	await conn.query(`CREATE TABLE IF NOT EXISTS accounts(
-		account_id CHAR(26) NOT NULL PRIMARY KEY,
-		full_name varchar(60) NOT NULL,
-		email varchar(60) NOT NULL UNIQUE,
-		password varchar(128) NOT NULL,
-		role ENUM('ADMIN', 'STAFF', 'PARTICIPANT') NOT NULL
-	);`);
 
-	await conn.query(`CREATE TABLE IF NOT EXISTS sessions(
-		session_id CHAR(128) NOT NULL PRIMARY KEY,
-		account_id CHAR(26) NOT NULL,
-		FOREIGN KEY (account_id) REFERENCES accounts(account_id) ON DELETE CASCADE
-	);`);
+	// not required: to detect unreleased connections
+	pool.on('acquire', (connection) => {
+		console.log(`Connection ${connection.threadId} acquired from pool`);
+	});
 
-	await conn.query(`CREATE TABLE IF NOT EXISTS subtests(
-		subtest_id SMALLINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-		subtest_name VARCHAR(32) NOT NULL
-	);`);
+	pool.on('connection', (connection) => {
+		console.log(`New connection ${connection.threadId} created in pool`);
+	});
 
-	await conn.query(`CREATE TABLE IF NOT EXISTS questions(
-		question_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-		subtest_id SMALLINT NOT NULL,
-		question_text VARCHAR(256) NOT NULL,
-		answer CHAR(1) NOT NULL,
-		FOREIGN KEY (subtest_id) REFERENCES subtests(subtest_id) ON DELETE CASCADE
-	);`);
+	pool.on('release', (connection) => {
+		console.log(`Connection ${connection.threadId} released back to pool`);
+	});
 
-	await conn.query(`CREATE TABLE IF NOT EXISTS choices(
-		question_id INT NOT NULL,
-		label CHAR(1) NOT NULL,
-		choice_value VARCHAR(100) NOT NULL,
-		FOREIGN KEY (question_id) REFERENCES questions(question_id) ON DELETE CASCADE
-	);`);
+	setInterval(() => {
+		// Get current number of active connections
+		const active = pool.activeConnections(); 
 
-	await conn.query(`CREATE TABLE IF NOT EXISTS scores(
-		score_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-		subtest_id SMALLINT NOT NULL,
-		account_id CHAR(26) NOT NULL,
-		score SMALLINT NOT NULL,
-		recorded_at TIMESTAMP NOT NULL,
-		FOREIGN KEY (subtest_id) REFERENCES subtests(subtest_id) ON DELETE CASCADE,
-		FOREIGN KEY (account_id) REFERENCES accounts(account_id) ON DELETE CASCADE
-	);`);
+		// Get total number of connections (used and unused)
+		const total = pool.totalConnections();  
 
-	await conn.query(`CREATE TABLE IF NOT EXISTS recorded_answers(
-		score_id INT NOT NULL,
-		question_id INT NOT NULL,
-		answer CHAR(1) NOT NULL,
-		FOREIGN KEY (score_id) REFERENCES scores(score_id) ON DELETE CASCADE,
-		FOREIGN KEY (question_id) REFERENCES questions(question_id) ON DELETE CASCADE
-	);`);
+		// Get current number of unused connections
+		const idle = pool.idleConnections();    
 
-	await conn.query(`CREATE TABLE IF NOT EXISTS question_logs(
-		question_id INT NOT NULL,
-		old_text INT,
-		old_answer INT,
-		FOREIGN KEY (question_id) REFERENCES questions(question_id) ON DELETE CASCADE
-	);`);
-	conn.release();
+		// Get size of pending connection requests queue
+		const queued = pool.taskQueueSize();   
+
+		console.log(`Pool status: ${active}/${total} connections active, ${idle} idle, ${queued} requests queued`);
+	}, 1000);
 }
-
-// not required: to detect unreleased connections
-/*pool.on('acquire', (connection) => {
-	console.log(`Connection ${connection.threadId} acquired from pool`);
-});
-
-pool.on('connection', (connection) => {
-	console.log(`New connection ${connection.threadId} created in pool`);
-});
-
-pool.on('release', (connection) => {
-	console.log(`Connection ${connection.threadId} released back to pool`);
-});*/
 
 export const getPool = function GetDatabasePool() {
 	return pool;
