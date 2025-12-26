@@ -46,10 +46,10 @@ export default async(c, db, util) => {
 				return await util.error(c, 400, 'Maaf, data jawaban kamu tidak valid.');
 			}
 
-			const userAnswer = getAnswer[0].toUpperCase();
+			const userAnswer = getAnswer[0];
+			const userAnswerLabel = userAnswer.answerLabel.toUpperCase();
 
-			let correctAnswer = question.answer;
-			let userAnswerLabel = userAnswer.answerLabel;
+			const correctAnswer = question.answer;
 
 			answerResults.push({ questionId, userAnswer: userAnswerLabel  });
 
