@@ -7,7 +7,7 @@ export default async(c, db, util) => {
 		const body = await c.req.json();
 
 		if (!util.validate.body(requiredData, body)) {
-			return await util.error(c, 400, 'Maaf, terdapat kesalahan saat mencoba masuk akun.');
+			return await util.error(c, 400, 'Maaf, terdapat kesalahan saat mencoba daftar akun.');
 		}
 
 		let { fullName, email, password } = body;
