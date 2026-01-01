@@ -13,8 +13,13 @@ export default async(c, db, util) => {
 		const shuffledQuestions = shuffleChoices(questions);
 
 		for (let question of shuffledQuestions) {
-			const choices = await db.choice.get(conn, question.question_id);
+			const qId = question.question_id;
+
+			const choices = await db.choice.get(conn, qId);
+			const rawImage = await db.questionImages.get(conn, qId);
+
 			question.choices = shuffleChoices(choices);
+			question.image = rawImage[0]?.image_name;
 		}
 
 		return c.json(shuffledQuestions);
