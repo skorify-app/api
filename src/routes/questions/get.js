@@ -26,7 +26,8 @@ export default async(c, db, util) => {
 				return await util.error(c, 400, 'Maaf, saat ini soal subtes tersebut tidak tersedia.');
 			}
 
-			questions = shuffleArray(subtestQuestions);
+			const shuffledQuestions = shuffleArray(subtestQuestions);
+			questions = await addChoicesAndImageData(shuffledQuestions, db, conn);
 		} else {
 			conn = await db.getConn();
 
@@ -55,26 +56,9 @@ export default async(c, db, util) => {
 			}
 
 			const filteredQuestions = allQuestions.filter(x => x.questions.length > 0);
-			questions = filteredQuestions.flatMap(item => item.questions)
+			const mappedQuestions = filteredQuestions.flatMap(item => item.questions)
+			questions = await addChoicesAndImageData(mappedQuestions, db, conn);
 		}
-
-
-
-
-		/*const questions = await db.question.get.contents(conn, subtestId, true);
-		if (!questions.length) return await util.error(c, 400, 'Maaf, subtest tidak dtemukan.');
-
-		const shuffledQuestions = shuffleChoices(questions);
-
-		for (let question of shuffledQuestions) {
-			const qId = question.question_id;
-
-			const choices = await db.choice.get(conn, qId);
-			const rawImage = await db.questionImages.get(conn, qId);
-
-			question.choices = shuffleChoices(choices);
-			question.image = rawImage[0]?.image_name;
-		}*/
 
 		return c.json(questions);
 	} catch(err) {
@@ -83,6 +67,22 @@ export default async(c, db, util) => {
 	} finally {
 		if (conn) conn.release();
 	}
+}
+
+async function addChoicesAndImageData(rawQuestions, db, conn) {
+	let result = [...rawQuestions];
+
+	for (let question of result) {
+		const qId = question.question_id;
+
+		const choices = await db.choice.get(conn, qId);
+		const rawImage = await db.questionImages.get(conn, qId);
+
+		question.choices = shuffleArray(choices);
+		question.image = rawImage[0]?.image_name;
+	}
+
+	return result;
 }
 
 function shuffleArray(values) {
