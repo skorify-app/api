@@ -5,31 +5,57 @@ export default async(c, db, util) => {
 		conn = await db.getConn();
 		const accountId = c.req.account.account_id;
 
-		const scores = await db.score.get.all(conn, accountId);
+		const scores = await db.allScore.get(conn, accountId);
 		if (!scores.length) return c.json([]);
 
 		const subtestList = await db.subtest.get(conn);
 
 		let result = [];
-		for (let score of scores) {
-			delete score.account_id;
-			delete score.score;
+		for (let rawScore of scores) {
+			delete rawScore.account_id;
+			delete rawScore.score;
 
-			score['subtest_name'] = subtestList.find(x => x.subtest_id === score.subtest_id).subtest_name;
+			let type = 'subtest';
+
+			let score = await db.score.get(conn, rawScore.score_id, accountId);
+			if (!score) {
+				type = 'umpb';
+				score = await db.umpbScore.get(conn, rawScore.score_id, accountId);
+			}
+
+			if (!score) continue;
+
+			score['id'] = rawScore.score_id;
+
+			let name = subtestList.find(x => x.subtest_id === score.subtest_id)?.subtest_name;
+			if (!name) name = 'Simulasi UMPB';
+
+			score['name'] = name;
 
 			score['recorded_at'] = util.convertTimestamp(score['recorded_at']);
 
 			let formattedQuestions = [];
 
 			// fetch wrong and correct answers
-			const recordedAnswer = await db.recordedAnswer.get(conn, score.score_id);
-
-			// if there is no questions, then this recoded scores is NOT valid
-			const questions = await db.question.get.contents(conn, score.subtest_id, false);
-			if (!questions.length) break;
+			let recordedAnswer;
+			if (type === 'subtest') {
+				recordedAnswer = await db.recordedAnswer.get(conn, score.id);
+			} else {
+				recordedAnswer = await db.umpbRecordedAnswer.get(conn, score.id);
+			}
 
 			// if the user answers aren't recoded, then this score is NOT valid (manually modified by someone)
 			if (!recordedAnswer.length) break;
+
+			let questions;
+			if (type === 'subtest') {
+				questions = await db.question.get.contents(conn, score.subtest_id, false);
+			} else {
+				const mappedId = recordedAnswer.map(x => parseInt(x.question_id));
+				questions = await db.question.get.withIDs(conn, mappedId);
+			}
+
+			if (!questions.length) break;
 
 			let [ correct, incorrect, empty ] = [0,0,0,0];
 

@@ -1,15 +1,10 @@
-export const get = {
-	one: async(conn, scoreId, accountId) => {
-		return (
-			await conn.query(
-				'SELECT score, subtest_id FROM scores WHERE score_id = ? AND account_id = ?;',
-				[scoreId, accountId]
-			)
-		)[0];
-	},
-	all: async(conn, accountId) => {
-		return await conn.query('SELECT * FROM scores WHERE account_id = ?;', [accountId]);
-	}
+export const get = async(conn, scoreId, accountId) => {
+	return (
+		await conn.query(
+			'SELECT score, subtest_id, recorded_at FROM scores WHERE score_id = ? AND account_id = ?;',
+			[scoreId, accountId]
+		)
+	)[0];
 }
 
 export const insert = async(conn, subtestId, accountId, score) => {

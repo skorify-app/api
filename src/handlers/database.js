@@ -9,6 +9,9 @@ import * as subtestHandler from '../database/subtest.js';
 import * as recordedAnswerHandler from '../database/recorded-answer.js';
 import * as scoreHandler from '../database/score.js';
 import * as questionImagesHandler from '../database/question-images.js';
+import * as umpbScoreHandler from '../database/umpb-scores.js';
+import * as allScoreHandler from '../database/all-scores.js';
+import * as umpbRecordedAnswerHandler from '../database/umpb-recorded-answer.js';
 
 const sslPath = import.meta.dirname + '/../../ssl/';
 let pool;
@@ -71,3 +74,6 @@ export const subtest = subtestHandler;
 export const recordedAnswer = recordedAnswerHandler;
 export const score = scoreHandler;
 export const questionImages = questionImagesHandler;
+export const umpbScore = umpbScoreHandler;
+export const allScore = allScoreHandler;
+export const umpbRecordedAnswer = umpbRecordedAnswerHandler

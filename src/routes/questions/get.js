@@ -1,4 +1,4 @@
-const QUESTION_TYPE = [ 'subtest', 'umpb' ];
+const QUESTION_TYPES = [ 'subtest', 'umpb' ];
 
 export default async(c, db, util) => {
 	let conn;
@@ -6,7 +6,7 @@ export default async(c, db, util) => {
 	try {
 		const type = c.req.query('type');
 		if (!type) return await util.error(c, 400, 'Maaf, soal pertanyaan itu tidak dtemukan.');
-		if (!QUESTION_TYPE.includes(type)) {
+		if (!QUESTION_TYPES.includes(type)) {
 			return await util.error(c, 400, 'Maaf, soal pertanyaan itu tidak dtemukan.');
 		}
 
@@ -24,6 +24,10 @@ export default async(c, db, util) => {
 			const subtestQuestions = await db.question.get.contents(conn, subtestId, true);
 			if (!subtestQuestions.length) {
 				return await util.error(c, 400, 'Maaf, saat ini soal subtes tersebut tidak tersedia.');
+			}
+
+			for (let j of subtestQuestions) {
+				j['subtest_id'] = subtestId;
 			}
 
 			const shuffledQuestions = shuffleArray(subtestQuestions);
@@ -56,6 +60,13 @@ export default async(c, db, util) => {
 			}
 
 			const filteredQuestions = allQuestions.filter(x => x.questions.length > 0);
+
+			for (let i of filteredQuestions) {
+				for (let j of i.questions) {
+					j['subtest_id'] = i.id;
+				}
+			}
+
 			const mappedQuestions = filteredQuestions.flatMap(item => item.questions)
 			questions = await addChoicesAndImageData(mappedQuestions, db, conn);
 		}
@@ -78,8 +89,12 @@ async function addChoicesAndImageData(rawQuestions, db, conn) {
 		const choices = await db.choice.get(conn, qId);
 		const rawImage = await db.questionImages.get(conn, qId);
 
+		const imageName = rawImage[0]?.image_name;
+
 		question.choices = shuffleArray(choices);
-		question.image = rawImage[0]?.image_name;
+		if (imageName) question.image = `${question.subtest_id}/${imageName}`;
+
+		delete question.subtest_id;
 	}
 
 	return result;

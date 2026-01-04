@@ -1,13 +1,45 @@
+const QUESTION_TYPES = [ 'subtest', 'umpb' ];
+
 export default async(c, db, util) => {
 	let conn;
 
 	try {
-		conn = await db.getConn();
+		const type = c.req.query('type');
+		if (!QUESTION_TYPES.includes(type)) {
+			return await util.error(c, 400, 'Maaf, data tidak ditemukan.');
+		}
 
 		const scoreId = c.req.param('scoreId');
 		const accountId = c.req.account.account_id;
 
-		let score = await db.score.get.one(conn, scoreId, accountId);
+		let score, recordedUserAnswers;
+
+		conn = await db.getConn();
+
+		if (type === 'subtest') {
+			score = await db.score.get(conn, scoreId, accountId);
+			recordedUserAnswers = await db.recordedAnswer.get(conn, scoreId);
+
+			const subtest = (await db.subtest.get(conn)).find(x => x.subtest_id === subtestId);
+			score['name'] = subtest.subtest_name;
+		} else {
+			score = await db.umpbScore.get(conn, scoreId, accountId);
+			recordedUserAnswers = await db.umpbRecordedAnswer.get(conn, scoreId);
+			score['name'] = 'Simulasi UMPB';
+		}
+
+		if (!score.score) return c.json(null, 404);
+		if (!recordedUserAnswers.length) return c.json(null, 404);
+
+		let answers = {
+			correct: 0,
+			incorrect: 0,
+			empty: 0
+		}
+
+		return c.json(score, 200);
+
+		/*let score = await db.score.get.one(conn, scoreId, accountId);
 		if (!score) return c.json(null, 404);
 
 		const recordedUserAnswers = await db.recordedAnswer.get(conn, scoreId);
@@ -59,7 +91,7 @@ export default async(c, db, util) => {
 		score['answers'] = answers;
 		score['questions'] = questions;
 
-		return c.json(score);
+		return c.json(score);*/
 	} catch(err) {
 		console.error(err);
 		return c.json(null, 503);
