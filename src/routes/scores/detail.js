@@ -21,7 +21,7 @@ export default async(c, db, util) => {
 		if (type === 'subtest') {
 			recordedUserAnswers = await db.recordedAnswer.get(conn, scoreId);
 
-			const subtest = (await db.subtest.get(conn)).find(x => x.subtest_id === subtestId);
+			const subtest = (await db.subtest.get(conn)).find(x => x.subtest_id === score.subtest_id);
 			score['name'] = subtest.subtest_name;
 		} else {
 			recordedUserAnswers = await db.umpbRecordedAnswer.get(conn, scoreId);
