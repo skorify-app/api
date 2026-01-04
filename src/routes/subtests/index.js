@@ -5,7 +5,11 @@ export default async(c, db, util) => {
 		conn = await db.getConn();
 
 		let result = [];
-		let umpbQuestions = [];
+		let umpb = {
+			total: 0,
+			duration: 0,
+			questions: []
+		}
 
 		let subtests = await db.subtest.get(conn);
 		if (subtests.length) {
@@ -17,11 +21,18 @@ export default async(c, db, util) => {
 				result.push(subtest);
 
 				// Only 50% of the total questions per subtest will show up as questions on UMPB
-				umpbQuestions.push({ name: subtest.subtest_name, amount: Math.round(intTotal / 2) });
+				const amount = Math.round(intTotal / 2);
+				umpb.total += amount;
+
+				umpb.questions.push({ name: subtest.subtest_name, amount });
 			}
+
+			// 90 seconds per one question,
+			// and yes, the duration is dynamic.
+			umpb.duration = umpb.total * 90;
 		}
 
-		return c.json({ subtests: result, umpb: umpbQuestions });
+		return c.json({ subtests: result, umpb });
 	} catch(err) {
 		console.error(err);
 		return await util.error(c, 500, 'Maaf, terdapat kesalahan pada server.');
