@@ -22,8 +22,8 @@ const app = new Hono()
 
 .get('/subtests', auth, (c) => route.subtests.index(c, db, util))
 
-.get('/questions/get/:subtestId', auth, (c) => route.questions.get(c, db, util))
-.post('/questions/submit', auth, (c) => route.questions.submit(c, db, util))
+.get('/questions', auth, (c) => route.questions.get(c, db, util))
+.post('/questions', auth, (c) => route.questions.submit(c, db, util))
 
 .get('/session/validate', auth, (c) => route.session.validate(c))
 
