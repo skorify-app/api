@@ -7,11 +7,6 @@ export default async(c, db, util) => {
 
 	try {
 		const body = await c.req.json();
-
-		if (!util.validate.body(requiredData, body)) {
-			return await util.error(c, 400, 'Maaf, data jawaban kamu tidak valid.');
-		}
-
 		const { type, answers } = body;
 
 		if (!answers || !answers.length) {
