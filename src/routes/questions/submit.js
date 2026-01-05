@@ -77,7 +77,7 @@ export default async(c, db, util) => {
 			totalScore = Math.min(Math.round(totalScore), MAX_SCORE);
 			const { account_id } = c.req.account;
 
-			const scoreId = await db.score.insert(conn, subtestId, account_id, totalScore);
+			const scoreId = await db.score.insert(conn, intId, account_id, totalScore);
 
 			await conn.beginTransaction();
 			await db.recordedAnswer.insert(conn, scoreId, answerResults);
