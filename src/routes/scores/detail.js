@@ -5,48 +5,29 @@ export default async(c, db, util) => {
 		const scoreId = c.req.param('scoreId');
 		const accountId = c.req.account.account_id;
 
-		let score, recordedUserAnswers;
-		let type = 'subtest';
-
 		conn = await db.getConn();
 
-		score = await db.score.get(conn, scoreId, accountId);
-		if (!score) {
-			type = 'umpb'
-			score = await db.umpbScore.get(conn, scoreId, accountId);
-		}
+		const score = await db.score.get.one(conn, scoreId, accountId);
+		if (!score) return c.json(null, 404);
 
-		if (!score.score) return c.json(null, 404);
+		const userAnswers = await db.recordedAnswer.get(conn, scoreId);
+		if (!userAnswers) return c.json(null, 404);
 
-		if (type === 'subtest') {
-			recordedUserAnswers = await db.recordedAnswer.get(conn, scoreId);
-
+		let scoreQuizName = 'Simulasi UMPB';
+		if (score.subtest_id) {
 			const subtest = (await db.subtest.get(conn)).find(x => x.subtest_id === score.subtest_id);
 			score['name'] = subtest.subtest_name;
-		} else {
-			recordedUserAnswers = await db.umpbRecordedAnswer.get(conn, scoreId);
-			score['name'] = 'Simulasi UMPB';
 		}
 
-		if (!recordedUserAnswers.length) return c.json(null, 404);
-
 		let rawQuestions;
-		if (type === 'subtest') {
+		if (score.subtest_id) {
 			rawQuestions = await db.question.get.contents(conn, score.subtest_id, false);
 		} else {
-			const mappedId = recordedUserAnswers.map(x => parseInt(x.question_id));
+			const mappedId = userAnswers.map(x => parseInt(x.question_id));
 			rawQuestions = await db.question.get.withIDs(conn, mappedId);
 		}
 
-		if (!rawQuestions || !rawQuestions.length) return c.json(null, 404);
-
-		let usesrRecordedAnswers;
-		if (type === 'subtest') {
-			usesrRecordedAnswers = await db.recordedAnswer.get(conn, scoreId);
-		} else {
-			usesrRecordedAnswers = await db.umpbRecordedAnswer.get(conn, scoreId)
-		}
-
+		if (!rawQuestions.length) return c.json(null, 404);
 
 		let questions = [];
 		let answers = {
@@ -55,7 +36,7 @@ export default async(c, db, util) => {
 			empty: 0
 		}
 
-		for (let userAnswer of usesrRecordedAnswers) {
+		for (let userAnswer of userAnswers) {
 			const questionData = rawQuestions.find(x => x.question_id === userAnswer.question_id);
 
 			// if the answer's question data does not exist,

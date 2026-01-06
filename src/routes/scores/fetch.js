@@ -5,7 +5,7 @@ export default async(c, db, util) => {
 		conn = await db.getConn();
 		const accountId = c.req.account.account_id;
 
-		const scores = await db.allScore.get(conn, accountId);
+		const scores = await db.score.get.all(conn, accountId);
 		if (!scores.length) return c.json([]);
 
 		const subtestList = await db.subtest.get(conn);
@@ -15,63 +15,47 @@ export default async(c, db, util) => {
 			delete rawScore.account_id;
 			delete rawScore.score;
 
-			let type = 'subtest';
-
-			let score = await db.score.get(conn, rawScore.score_id, accountId);
-			if (!score) {
-				type = 'umpb';
-				score = await db.umpbScore.get(conn, rawScore.score_id, accountId);
-			}
-
+			const score = await db.score.get.one(conn, rawScore.score_id, accountId);
 			if (!score) continue;
 
 			score['id'] = rawScore.score_id;
 
-			let name = subtestList.find(x => x.subtest_id === score.subtest_id)?.subtest_name;
-			if (!name) name = 'Simulasi UMPB';
-
-			score['name'] = name;
-
-			score['recorded_at'] = util.convertTimestamp(score['recorded_at']);
-
-			let formattedQuestions = [];
-
-			// fetch wrong and correct answers
-			let recordedAnswer;
-			if (type === 'subtest') {
-				recordedAnswer = await db.recordedAnswer.get(conn, score.id);
-			} else {
-				recordedAnswer = await db.umpbRecordedAnswer.get(conn, score.id);
+			let name = 'Simulasi UMPB';
+			if (score.subtest_id) {
+				name = subtestList.find(x => x.subtest_id === score.subtest_id)?.subtest_name;
 			}
 
-			// if the user answers aren't recoded, then this score is NOT valid (manually modified by someone)
-			if (!recordedAnswer.length) break;
+			score['name'] = name;
+			score['recorded_at'] = util.convertTimestamp(score['recorded_at']);
+
+			const userAnswers = await db.recordedAnswer.get(conn, score.id);
+			if (!userAnswers.length) continue;
 
 			let questions;
-			if (type === 'subtest') {
+			if (score.subtest_id) {
 				questions = await db.question.get.contents(conn, score.subtest_id, false);
 			} else {
-				const mappedId = recordedAnswer.map(x => parseInt(x.question_id));
+				const mappedId = userAnswers.map(x => parseInt(x.question_id));
 				questions = await db.question.get.withIDs(conn, mappedId);
 			}
 
-			if (!questions.length) break;
+			if (!questions.length) continue;
 
-			let [ correct, incorrect, empty ] = [0,0,0,0];
+			let [ correct, incorrect, empty ] = [0,0,0];
 
-			for (let answer of recordedAnswer) {
+			for (let answer of userAnswers) {
 				const questionId = answer.question_id;
 
-				const userAnswer = answer.answer;
-				const correctAnswer = questions
+				const answerLabel = answer.answer;
+				const correctAnswerLabel = questions
 				.find(question => question.question_id === questionId)
 				.answer;
 
-				if (!userAnswer) {
+				if (!answerLabel) {
 					empty++;
-				} else if (userAnswer === correctAnswer) {
+				} else if (answerLabel === correctAnswerLabel) {
 					correct++;
-				} else if (userAnswer !== correctAnswer) {
+				} else if (answerLabel !== correctAnswerLabel) {
 					incorrect++
 				}
 			}
