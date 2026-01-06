@@ -8,6 +8,7 @@ export default async(c, db, util) => {
 	try {
 		const body = await c.req.json();
 		const { type, answers } = body;
+		let subtestId = body.subtestId;
 
 		if (!answers || !answers.length) {
 			return await util.error(c, 400, 'Maaf, data jawaban kamu tidak valid.');
@@ -17,143 +18,72 @@ export default async(c, db, util) => {
 			return await util.error(c, 400, 'Maaf, data jawaban kamu tidak valid.');
 		}
 
-		if (type === 'subtest') {
-
-			const intId = parseInt(body.subtestId);
+		if (subtestId) {
+			const intId = parseInt(subtestId);
 			if (isNaN(intId) || intId < 0) return c.json({ error: '400 Bad Request' }, 400);
-
-			conn = await db.getConn();
-
-			const questions = await db.question.get.contents(conn, intId, false);
-			const questionLen = questions.length;
-			if (!questionLen) return await util.error(c, 400, 'Maaf, subtest tidak dtemukan.');
-
-			// Counting the score
-			const scorePerQuestion = MAX_SCORE / questionLen;
-			let totalScore = 0;
-
-			// user's valid answers (like no duplicate answers)
-			let answerResults = [];
-
-			// loop all user's answers
-			for (let question of questions) {
-				let questionId = question.question_id;
-
-				// get the answer using filter by answer id
-				let getAnswer = answers.filter(answer => answer.id === String(questionId));
-				const len = getAnswer.length;
-
-				// if the filtered answer is empty, set the answer label as null
-				if (!len) {
-					answerResults.push({ questionId, userAnswer: null  });
-					continue;
-				}
-
-				// if the answer is duplicated
-				if (len > 1) {
-					return await util.error(c, 400, 'Maaf, data jawaban kamu tidak valid.');
-				}
-
-				// the answer data
-				const userAnswer = getAnswer[0];
-
-				// the answer label
-				const userAnswerLabel = userAnswer.answerLabel.toUpperCase();
-
-				// put answer to the array of valid answers
-				answerResults.push({ questionId, userAnswer: userAnswerLabel  });
-
-				// the correct answer label
-				const correctAnswer = question.answer;
-
-				// if the user's answer label is equals with the correct answer label
-				if (userAnswerLabel === correctAnswer) {
-					// add score
-					totalScore += scorePerQuestion;
-					continue;
-				}
-			}
-
-			totalScore = Math.min(Math.round(totalScore), MAX_SCORE);
-			const { account_id } = c.req.account;
-
-			const scoreId = await db.score.insert(conn, intId, account_id, totalScore);
-
-			await conn.beginTransaction();
-			await db.recordedAnswer.insert(conn, scoreId, answerResults);
-
-			await conn.commit();
-
-			return c.text(scoreId, 200);
-
-		} else {
-
-			conn = await db.getConn();
-
-			const mappedId = answers.map(x => parseInt(x.id));
-			const questions = await db.question.get.withIDs(conn, mappedId);
-			const questionLen = questions.length;
-
-			if (!questionLen) return await util.error(c, 400, 'Maaf, data jawaban kamu tidak valid.');
-
-			// Counting the score
-			const scorePerQuestion = MAX_SCORE / questionLen;
-			let totalScore = 0;
-
-			// user's valid answers (like no duplicate answers)
-			let answerResults = [];
-
-			// loop all user's answers
-			for (let question of questions) {
-				let questionId = question.question_id;
-
-				// get the answer using filter by answer id
-				let getAnswer = answers.filter(answer => answer.id === String(questionId));
-				const len = getAnswer.length;
-
-				// if the filtered answer is empty, set the answer label as null
-				if (!len) {
-					answerResults.push({ questionId, userAnswer: null  });
-					continue;
-				}
-
-				// if the answer is duplicated
-				if (len > 1) {
-					return await util.error(c, 400, 'Maaf, data jawaban kamu tidak valid.');
-				}
-
-				// the answer data
-				const userAnswer = getAnswer[0];
-
-				// the answer label
-				const userAnswerLabel = userAnswer.answerLabel.toUpperCase();
-
-				// put answer to the array of valid answers
-				answerResults.push({ questionId, userAnswer: userAnswerLabel  });
-
-				// the correct answer label
-				const correctAnswer = question.answer;
-
-				// if the user's answer label is equals with the correct answer label
-				if (userAnswerLabel === correctAnswer) {
-					// add score
-					totalScore += scorePerQuestion;
-					continue;
-				}
-			}
-
-			totalScore = Math.min(Math.round(totalScore), MAX_SCORE);
-			const { account_id } = c.req.account;
-
-			const scoreId = await db.umpbScore.insert(conn, account_id, totalScore);
-
-			await conn.beginTransaction();
-			await db.umpbRecordedAnswer.insert(conn, scoreId, answerResults);
-
-			await conn.commit();
-
-			return c.text(scoreId, 200);
+			subtestId = intId;
 		}
+
+
+
+		conn = await db.getConn();
+
+		let questions;
+		if (subtestId) {
+			questions = await db.question.get.contents(conn, subtestId, false);
+		} else {
+			const mappedId = answers.map(x => parseInt(x.id));
+			questions = await db.question.get.withIDs(conn, mappedId);
+		}
+
+		const questionLen = questions.length;
+		if (!questionLen) {
+			return await util.error(c, 400, `Maaf, data ${subtestId ? 'subtes' : 'UMPB'} tidak ditemukan`);
+		}
+
+
+		const scorePerQuestion = MAX_SCORE / questionLen;
+		let totalScore = 0;
+
+
+		// user's valid answers (example: no duplicate answers)
+		let validAnswers = [];
+
+		for (let question of questions) {
+			const questionId = question.question_id;
+			const rawUserAnswer = answers.filter(answer => answer.id === String(questionId));
+
+			if (!rawUserAnswer.length) {
+				validAnswers.push({ questionId, userAnswer: null  });
+				continue;
+			}
+
+			if (rawUserAnswer.length > 1) {
+				return await util.error(c, 400, 'Maaf, ada jawaban kamu ada yang terduplikat. Silakan coba kerjakan kembali.');
+			}
+
+
+			const userAnswer = rawUserAnswer[0];
+			const userAnswerLabel = userAnswer.answerLabel.toUpperCase();
+			validAnswers.push({ questionId, userAnswer: userAnswerLabel  });
+
+
+			const correctAnswer = question.answer;
+			if (userAnswerLabel === correctAnswer) totalScore += scorePerQuestion;
+		}
+
+
+		totalScore = Math.min(Math.round(totalScore), MAX_SCORE);
+
+
+		const { account_id: accountId } = c.req.account;
+		const scoreId = await db.score.insert({ conn, subtestId, accountId, score: totalScore });
+
+		await conn.beginTransaction();
+		await db.recordedAnswer.insert(conn, scoreId, validAnswers);
+		await conn.commit();
+
+		return c.text(scoreId, 200);
 	} catch(err) {
 		// almost two of these errors are generated because of
 		// broken JSON data from client that has been tampered.
