@@ -16,8 +16,10 @@ export default async(c, db, util) => {
 		let scoreQuizName = 'Simulasi UMPB';
 		if (score.subtest_id) {
 			const subtest = (await db.subtest.get(conn)).find(x => x.subtest_id === score.subtest_id);
-			score['name'] = subtest.subtest_name;
+			scoreQuizName = subtest.subtest_name;
 		}
+
+		score['name'] = scoreQuizName;
 
 		let rawQuestions;
 		if (score.subtest_id) {
