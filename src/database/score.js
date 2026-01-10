@@ -21,7 +21,7 @@ export const insert = async({ conn, subtestId, accountId, score }) => {
 	let args = [subtestId, accountId, score];
 	let query = 'INSERT INTO scores(subtest_id, account_id, score) VALUES(?, ?, ?) RETURNING score_id;';
 
-	if (subtestId) {
+	if (!subtestId) {
 		query = 'INSERT INTO scores(subtest_id, account_id, score) VALUES(NULL, ?, ?) RETURNING score_id;';
 		args = [accountId, score];
 	}
