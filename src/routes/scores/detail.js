@@ -45,10 +45,24 @@ export default async(c, db, util) => {
 			// it means the question data was deleted previously
 			if (!questionData) continue;
 
+			let finalData = {};
+
+			finalData['text'] = questionData.question_text;
+
+
 			const questionId = questionData.question_id;
+
+			const questionImage = await db.questionImages.get(conn, questionId);
+			if (questionImage.length) finalData['image'] = questionImage[0]?.image_name;
+
 			const correctAnswer = questionData.answer_label;
+			finalData['correctAnswer'] = correctAnswer;
+
 			const userAnswerLabel = userAnswer.answer;
+			finalData['userAnswer'] = userAnswerLabel;
+
 			const choices = await db.choice.get(conn, questionId);
+			finalData['choices'] = choices;
 
 			if (!userAnswerLabel) {
 				answers.empty++;
@@ -58,12 +72,7 @@ export default async(c, db, util) => {
 				answers.incorrect++;
 			}
 
-			questions.push({
-				text: questionData.question_text,
-				correctAnswer,
-				userAnswer: userAnswerLabel,
-				choices
-			});
+			questions.push(finalData);
 		}
 
 		score['questions'] = questions;
