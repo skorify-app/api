@@ -53,7 +53,7 @@ export default async(c, db, util) => {
 			const questionId = questionData.question_id;
 
 			const questionImage = await db.questionImages.get(conn, questionId);
-			if (questionImage.length) finalData['image'] = questionImage[0]?.image_name;
+			if (questionImage.length) finalData['image'] = `${questionId}/${questionImage[0]?.image_name}`;
 
 			const correctAnswer = questionData.answer_label;
 			finalData['correctAnswer'] = correctAnswer;
