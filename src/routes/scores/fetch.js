@@ -46,10 +46,10 @@ export default async(c, db, util) => {
 			for (let answer of userAnswers) {
 				const questionId = answer.question_id;
 
-				const answerLabel = answer.answer_label;
+				const answerLabel = answer.answer;
 				const correctAnswerLabel = questions
 				.find(question => question.question_id === questionId)
-				.answer;
+				.answer_label;
 
 				if (!answerLabel) {
 					empty++;
