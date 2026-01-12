@@ -46,7 +46,7 @@ export default async(c, db, util) => {
 			if (!questionData) continue;
 
 			const questionId = questionData.question_id;
-			const correctAnswer = questionData.answer;
+			const correctAnswer = questionData.answer_label;
 			const userAnswerLabel = userAnswer.answer;
 			const choices = await db.choice.get(conn, questionId);
 
