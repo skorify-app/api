@@ -68,7 +68,7 @@ export default async(c, db, util) => {
 			validAnswers.push({ questionId, userAnswer: userAnswerLabel  });
 
 
-			const correctAnswer = question.answer;
+			const correctAnswer = question.answer_label;
 			if (userAnswerLabel === correctAnswer) totalScore += scorePerQuestion;
 		}
 

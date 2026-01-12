@@ -1,6 +1,6 @@
 export const get = {
 	contents: async(conn, subtestId, forParticipant) => {
-		let query = 'SELECT question_id, question_text, answer FROM questions WHERE subtest_id = ?;';
+		let query = 'SELECT question_id, question_text, answer_label FROM questions WHERE subtest_id = ?;';
 		if (forParticipant) {
 			query = 'SELECT question_id, question_text FROM questions WHERE subtest_id = ?;';
 		}
